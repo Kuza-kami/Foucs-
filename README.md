@@ -14,9 +14,9 @@
 
 ## ☕ Support
 
-If Focus has helped you do better work, consider buying me a coffee.
+If Focus has helped you do better work, consider supporting the project on Ko-fi or PayPal.
 
-**[buymeacoffee.com/YOUR-BMC-USERNAME](https://www.buymeacoffee.com/YOUR-BMC-USERNAME)**
+**[ko-fi.com/kuzashikami](https://ko-fi.com/kuzashikami)**
 
 ---
 
