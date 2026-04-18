@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Focus — Do what matters.</title>
+
+<!-- SEO -->
+<meta name="description" content="A minimal productivity app built for deep work. No clutter. No noise. Just focus." />
+<meta name="keywords" content="focus app, productivity, deep work, pomodoro, task manager, android" />
+<meta name="author" content="Focus App" />
+
+<!-- Open Graph (WhatsApp, Twitter previews) -->
+<meta property="og:title" content="Focus — Do what matters." />
+<meta property="og:description" content="A minimal task manager built for deep work. Free to download on Android." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://Kuza-kami.github.io/Foucs-" />
+<meta name="twitter:card" content="summary_large_image" />
+
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --border: #1e1e1e;
+    --text: #e8e4dc;
+    --muted: #5a5650;
+    --accent: #c8a96e;
+    --accent-dim: rgba(200,169,110,0.12);
+    --bmc: #FFDD00;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-weight: 300;
+    min-height: 100vh;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    position: fixed; width: 8px; height: 8px;
+    background: var(--accent); border-radius: 50%;
+    pointer-events: none; z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s ease, opacity 0.2s;
+  }
+  .cursor-ring {
+    position: fixed; width: 32px; height: 32px;
+    border: 1px solid rgba(200,169,110,0.4); border-radius: 50%;
+    pointer-events: none; z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: transform 0.25s ease, width 0.2s, height 0.2s, border-color 0.2s;
+  }
+
+  /* Grain overlay */
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 100; opacity: 0.6;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 2rem 3rem;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.4s, background 0.4s;
+  }
+  nav.scrolled {
+    border-color: var(--border);
+    background: rgba(10,10,10,0.92);
+    backdrop-filter: blur(12px);
+  }
+  .nav-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem; font-weight: 300;
+    letter-spacing: 0.15em; color: var(--text); text-decoration: none;
+  }
+  .nav-logo span { color: var(--accent); }
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+  .nav-links a {
+    font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--muted); text-decoration: none; transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta {
+    font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--accent); border: 1px solid rgba(200,169,110,0.35);
+    padding: 0.55rem 1.2rem; text-decoration: none;
+    transition: background 0.2s, color 0.2s;
+  }
+  .nav-cta:hover { background: var(--accent); color: var(--bg); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh; display: flex; flex-direction: column;
+    justify-content: center; padding: 0 3rem;
+    position: relative; overflow: hidden;
+  }
+  .hero-bg-line {
+    position: absolute; top: 50%; left: 0; right: 0; height: 1px;
+    background: linear-gradient(to right, transparent, var(--border) 30%, var(--border) 70%, transparent);
+    opacity: 0.5;
+  }
+  .hero-bg-circle {
+    position: absolute; width: 600px; height: 600px;
+    border: 1px solid var(--border); border-radius: 50%;
+    top: 50%; right: -150px; transform: translateY(-50%); opacity: 0.4;
+  }
+  .hero-bg-circle2 {
+    position: absolute; width: 380px; height: 380px;
+    border: 1px solid rgba(200,169,110,0.08); border-radius: 50%;
+    top: 50%; right: 35px; transform: translateY(-50%);
+  }
+  .hero-label {
+    font-size: 0.6rem; letter-spacing: 0.35em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 2rem;
+    opacity: 0; animation: fadeUp 0.8s 0.2s forwards;
+  }
+  .hero-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(5rem, 14vw, 13rem); font-weight: 300;
+    line-height: 0.9; letter-spacing: -0.02em; max-width: 800px;
+    opacity: 0; animation: fadeUp 0.9s 0.35s forwards;
+  }
+  .hero-title em { font-style: italic; color: var(--accent); }
+  .hero-sub {
+    margin-top: 2.5rem; font-size: 0.7rem; letter-spacing: 0.12em;
+    color: var(--muted); max-width: 340px; line-height: 2;
+    opacity: 0; animation: fadeUp 0.9s 0.5s forwards;
+  }
+  .hero-actions {
+    margin-top: 3.5rem; display: flex; align-items: center; gap: 2.5rem;
+    opacity: 0; animation: fadeUp 0.9s 0.65s forwards;
+  }
+  .btn-primary {
+    background: var(--accent); color: var(--bg);
+    font-family: 'DM Mono', monospace; font-size: 0.65rem;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    padding: 1rem 2.2rem; text-decoration: none; border: none; cursor: none;
+    transition: opacity 0.2s, transform 0.2s; display: inline-block;
+  }
+  .btn-primary:hover { opacity: 0.85; transform: translateY(-1px); }
+  .btn-ghost {
+    font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--muted); text-decoration: none;
+    display: flex; align-items: center; gap: 0.6rem; transition: color 0.2s;
+  }
+  .btn-ghost:hover { color: var(--text); }
+  .btn-ghost::after { content: '→'; transition: transform 0.2s; }
+  .btn-ghost:hover::after { transform: translateX(4px); }
+  .hero-scroll {
+    position: absolute; bottom: 2.5rem; left: 3rem;
+    font-size: 0.55rem; letter-spacing: 0.3em; text-transform: uppercase;
+    color: var(--muted); display: flex; align-items: center; gap: 1rem;
+    opacity: 0; animation: fadeUp 1s 1s forwards;
+  }
+  .hero-scroll::before { content: ''; width: 40px; height: 1px; background: var(--muted); }
+
+  /* MARQUEE */
+  .marquee-wrap {
+    overflow: hidden; border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border); padding: 1.2rem 0; background: var(--surface);
+  }
+  .marquee-track {
+    display: flex; gap: 3rem;
+    animation: marquee 20s linear infinite; white-space: nowrap;
+  }
+  .marquee-track span { font-size: 0.6rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--muted); flex-shrink: 0; }
+  .marquee-track span.accent { color: var(--accent); }
+  @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+  /* FEATURES */
+  .features { padding: 10rem 3rem; max-width: 1200px; margin: 0 auto; }
+  .section-label { font-size: 0.6rem; letter-spacing: 0.35em; text-transform: uppercase; color: var(--accent); margin-bottom: 1.2rem; }
+  .section-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.5rem, 5vw, 4.5rem); font-weight: 300; line-height: 1.1; max-width: 600px; margin-bottom: 6rem; }
+  .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); }
+  .feature-card {
+    background: var(--bg); padding: 3rem 2.5rem;
+    transition: background 0.3s; position: relative; overflow: hidden;
+  }
+  .feature-card::before { content: ''; position: absolute; inset: 0; background: var(--accent-dim); opacity: 0; transition: opacity 0.3s; }
+  .feature-card:hover::before { opacity: 1; }
+  .feature-num { font-size: 0.55rem; letter-spacing: 0.25em; color: var(--accent); margin-bottom: 2rem; display: block; }
+  .feature-icon { font-size: 1.6rem; margin-bottom: 1.5rem; display: block; filter: grayscale(0.3); }
+  .feature-name { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 300; margin-bottom: 1rem; line-height: 1.2; }
+  .feature-desc { font-size: 0.65rem; letter-spacing: 0.05em; color: var(--muted); line-height: 2; }
+
+  /* STATS */
+  .stats {
+    border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    padding: 5rem 3rem; display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 1px; background: var(--border);
+  }
+  .stat-block { background: var(--bg); padding: 3rem; text-align: center; }
+  .stat-num { font-family: 'Cormorant Garamond', serif; font-size: clamp(3rem, 6vw, 5rem); font-weight: 300; color: var(--accent); line-height: 1; margin-bottom: 0.8rem; }
+  .stat-label { font-size: 0.6rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--muted); }
+
+  /* HOW IT WORKS */
+  .how { padding: 10rem 3rem; max-width: 1200px; margin: 0 auto; }
+  .how-steps { display: grid; grid-template-columns: 1fr 1fr; gap: 6rem; align-items: center; margin-top: 5rem; }
+  .step-list { display: flex; flex-direction: column; gap: 0; }
+  .step {
+    padding: 2rem 0; border-bottom: 1px solid var(--border);
+    display: grid; grid-template-columns: 3rem 1fr; gap: 1.5rem;
+    align-items: start; cursor: none; transition: padding-left 0.3s;
+  }
+  .step:hover { padding-left: 0.5rem; }
+  .step:first-child { border-top: 1px solid var(--border); }
+  .step-n { font-size: 0.55rem; letter-spacing: 0.2em; color: var(--accent); padding-top: 0.2rem; }
+  .step-content h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-weight: 300; margin-bottom: 0.5rem; }
+  .step-content p { font-size: 0.65rem; letter-spacing: 0.05em; color: var(--muted); line-height: 2; }
+  .how-visual {
+    position: relative; height: 480px; border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center; overflow: hidden;
+  }
+  .phone-mock {
+    width: 200px; height: 380px; border: 2px solid var(--border); border-radius: 28px;
+    background: var(--surface); display: flex; flex-direction: column;
+    padding: 1.5rem 1rem; gap: 0.7rem; position: relative; z-index: 2;
+  }
+  .phone-bar { height: 6px; border-radius: 3px; background: var(--border); }
+  .phone-bar.accent { background: var(--accent); width: 60%; }
+  .phone-bar.short { width: 40%; }
+  .phone-bar.xshort { width: 25%; }
+  .phone-block { height: 50px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; margin-top: 0.4rem; }
+  .phone-block.highlight { border-color: rgba(200,169,110,0.3); background: var(--accent-dim); }
+  .how-visual-bg { position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, rgba(200,169,110,0.04) 0%, transparent 70%); }
+  .how-tag { position: absolute; font-size: 0.55rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); border: 1px solid rgba(200,169,110,0.25); padding: 0.4rem 0.8rem; background: var(--bg); }
+  .how-tag.tl { top: 1.5rem; left: 1.5rem; }
+  .how-tag.br { bottom: 1.5rem; right: 1.5rem; }
+
+  /* CTA / DOWNLOAD */
+  .cta-section {
+    padding: 10rem 3rem; text-align: center;
+    position: relative; overflow: hidden;
+  }
+  .cta-section::before {
+    content: ''; position: absolute; width: 800px; height: 800px;
+    border: 1px solid var(--border); border-radius: 50%;
+    top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.3;
+  }
+  .cta-section::after {
+    content: ''; position: absolute; width: 500px; height: 500px;
+    border: 1px solid rgba(200,169,110,0.1); border-radius: 50%;
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+  }
+  .cta-inner { position: relative; z-index: 2; }
+  .cta-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(3rem, 8vw, 7rem); font-weight: 300; line-height: 1; margin-bottom: 1.5rem; }
+  .cta-title em { font-style: italic; color: var(--accent); }
+  .cta-sub { font-size: 0.65rem; letter-spacing: 0.12em; color: var(--muted); margin-bottom: 3rem; line-height: 2; }
+  .store-badges { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+  .badge {
+    border: 1px solid var(--border); padding: 0.9rem 2rem;
+    display: flex; align-items: center; gap: 0.8rem;
+    text-decoration: none; color: var(--text); font-size: 0.65rem;
+    letter-spacing: 0.1em; transition: border-color 0.2s, background 0.2s; cursor: none;
+  }
+  .badge:hover { border-color: var(--accent); background: var(--accent-dim); }
+  .badge-icon { font-size: 1.2rem; }
+  .badge-sub { font-size: 0.5rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); display: block; }
+
+  /* ── BUY ME A COFFEE SECTION ── */
+  .support {
+    padding: 8rem 3rem;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .support-inner { position: relative; z-index: 2; max-width: 560px; margin: 0 auto; }
+  .support-icon {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 1.5rem;
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  .support .section-label { margin-bottom: 1rem; }
+  .support-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 300; line-height: 1.15;
+    margin-bottom: 1.2rem;
+  }
+  .support-title em { font-style: italic; color: var(--accent); }
+  .support-desc {
+    font-size: 0.65rem; letter-spacing: 0.1em;
+    color: var(--muted); line-height: 2.2;
+    margin-bottom: 2.5rem;
+  }
+  .bmc-btn {
+    display: inline-flex; align-items: center; gap: 0.8rem;
+    background: var(--bmc); color: #000;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem; font-weight: 400;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 1rem 2.2rem;
+    text-decoration: none; cursor: none;
+    border: 2px solid var(--bmc);
+    transition: background 0.2s, color 0.2s, transform 0.2s;
+    position: relative; overflow: hidden;
+  }
+  .bmc-btn:hover { background: transparent; color: var(--bmc); transform: translateY(-2px); }
+  .bmc-btn-icon { font-size: 1.1rem; }
+  .support-note {
+    margin-top: 1.5rem;
+    font-size: 0.55rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--muted);
+  }
+  .support-note a { color: var(--accent); text-decoration: none; }
+  .support-note a:hover { text-decoration: underline; }
+
+  /* Floating BMC button */
+  .bmc-float {
+    position: fixed; bottom: 2rem; right: 2rem; z-index: 200;
+    background: var(--bmc); color: #000;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem; font-weight: 400;
+    letter-spacing: 0.1em;
+    padding: 0.7rem 1.2rem;
+    text-decoration: none; cursor: none;
+    border: 2px solid var(--bmc);
+    display: flex; align-items: center; gap: 0.5rem;
+    transition: background 0.2s, color 0.2s, transform 0.2s;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+    opacity: 0;
+    animation: fadeUp 0.8s 1.5s forwards;
+  }
+  .bmc-float:hover { background: transparent; color: var(--bmc); transform: translateY(-2px); }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border); padding: 3rem;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .footer-copy { font-size: 0.6rem; letter-spacing: 0.15em; color: var(--muted); }
+  .footer-links { display: flex; gap: 2rem; list-style: none; }
+  .footer-links a { font-size: 0.6rem; letter-spacing: 0.15em; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+  .footer-links a:hover { color: var(--accent); }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+  .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    nav { padding: 1.5rem; }
+    .nav-links { display: none; }
+    .hero { padding: 0 1.5rem; }
+    .hero-bg-circle { display: none; }
+    .features, .how, .cta-section, .support { padding: 6rem 1.5rem; }
+    .features-grid { grid-template-columns: 1fr; }
+    .stats { grid-template-columns: 1fr; padding: 3rem 1.5rem; }
+    .how-steps { grid-template-columns: 1fr; gap: 3rem; }
+    .how-visual { height: 280px; }
+    footer { flex-direction: column; gap: 1.5rem; text-align: center; }
+    .bmc-float { bottom: 1rem; right: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- FLOATING BMC BUTTON -->
+<!-- ⚠️ Replace YOUR-BMC-USERNAME with your Buy Me a Coffee username -->
+<a href="https://www.buymeacoffee.com/YOUR-BMC-USERNAME" target="_blank" class="bmc-float" rel="noopener">
+  ☕ Buy me a coffee
+</a>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#" class="nav-logo">Focu<span>s</span></a>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#how">How it works</a></li>
+    <li><a href="#download">Download</a></li>
+    <li><a href="#support">Support</a></li>
+  </ul>
+  <a href="#download" class="nav-cta">Get the App</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg-line"></div>
+  <div class="hero-bg-circle"></div>
+  <div class="hero-bg-circle2"></div>
+  <p class="hero-label">Productivity · Clarity · Intention</p>
+  <h1 class="hero-title">Do what<br><em>matters.</em></h1>
+  <p class="hero-sub">A minimal task manager built for deep work. No clutter. No noise. Just focus.</p>
+  <div class="hero-actions">
+    <a href="#download" class="btn-primary">Download Free</a>
+    <a href="#features" class="btn-ghost">See Features</a>
+  </div>
+  <p class="hero-scroll">Scroll to explore</p>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-track">
+    <span class="accent">·</span><span>Deep Work</span>
+    <span class="accent">·</span><span>Task Management</span>
+    <span class="accent">·</span><span>Pomodoro Timer</span>
+    <span class="accent">·</span><span>Habit Tracking</span>
+    <span class="accent">·</span><span>Flow State</span>
+    <span class="accent">·</span><span>Daily Planning</span>
+    <span class="accent">·</span><span>Zero Distraction</span>
+    <span class="accent">·</span><span>Deep Work</span>
+    <span class="accent">·</span><span>Task Management</span>
+    <span class="accent">·</span><span>Pomodoro Timer</span>
+    <span class="accent">·</span><span>Habit Tracking</span>
+    <span class="accent">·</span><span>Flow State</span>
+    <span class="accent">·</span><span>Daily Planning</span>
+    <span class="accent">·</span><span>Zero Distraction</span>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <p class="section-label reveal">What's inside</p>
+  <h2 class="section-title reveal">Engineered for<br>the focused mind.</h2>
+  <div class="features-grid">
+    <div class="feature-card reveal">
+      <span class="feature-num">01</span>
+      <span class="feature-icon">⏱</span>
+      <h3 class="feature-name">Pomodoro Timer</h3>
+      <p class="feature-desc">Work in structured sprints. Built-in focus sessions with custom intervals keep you in flow without burning out.</p>
+    </div>
+    <div class="feature-card reveal">
+      <span class="feature-num">02</span>
+      <span class="feature-icon">✦</span>
+      <h3 class="feature-name">Priority Tasks</h3>
+      <p class="feature-desc">Highlight the three things that actually move the needle today. Everything else waits its turn.</p>
+    </div>
+    <div class="feature-card reveal">
+      <span class="feature-num">03</span>
+      <span class="feature-icon">◈</span>
+      <h3 class="feature-name">Habit Grid</h3>
+      <p class="feature-desc">Build consistency with a minimal streak tracker. Visual, frictionless, and honest about your patterns.</p>
+    </div>
+    <div class="feature-card reveal">
+      <span class="feature-num">04</span>
+      <span class="feature-icon">◇</span>
+      <h3 class="feature-name">Daily Review</h3>
+      <p class="feature-desc">End each day with a one-minute reflection. Track wins, identify friction, and plan smarter tomorrow.</p>
+    </div>
+    <div class="feature-card reveal">
+      <span class="feature-num">05</span>
+      <span class="feature-icon">⬡</span>
+      <h3 class="feature-name">Focus Mode</h3>
+      <p class="feature-desc">One task. Full screen. Nothing else. Distraction-blocking mode that holds you accountable to the present.</p>
+    </div>
+    <div class="feature-card reveal">
+      <span class="feature-num">06</span>
+      <span class="feature-icon">○</span>
+      <h3 class="feature-name">Offline First</h3>
+      <p class="feature-desc">No account needed. Your data stays on your device. Works anywhere, with or without a connection.</p>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat-block reveal">
+    <div class="stat-num">3×</div>
+    <div class="stat-label">More tasks completed daily</div>
+  </div>
+  <div class="stat-block reveal">
+    <div class="stat-num">0</div>
+    <div class="stat-label">Unnecessary notifications</div>
+  </div>
+  <div class="stat-block reveal">
+    <div class="stat-num">∞</div>
+    <div class="stat-label">Days of deep work ahead</div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how">
+  <p class="section-label reveal">The system</p>
+  <h2 class="section-title reveal">Simple by design.<br>Powerful by habit.</h2>
+  <div class="how-steps">
+    <div class="step-list">
+      <div class="step reveal">
+        <span class="step-n">01</span>
+        <div class="step-content">
+          <h3>Set your three priorities</h3>
+          <p>Each morning, pick three tasks that genuinely matter. Not ten. Not a list. Three.</p>
+        </div>
+      </div>
+      <div class="step reveal">
+        <span class="step-n">02</span>
+        <div class="step-content">
+          <h3>Enter Focus Mode</h3>
+          <p>Lock onto one task at a time. The timer runs. Everything else disappears.</p>
+        </div>
+      </div>
+      <div class="step reveal">
+        <span class="step-n">03</span>
+        <div class="step-content">
+          <h3>Track your habits</h3>
+          <p>Log the small things daily. Consistency compounds into results you can see.</p>
+        </div>
+      </div>
+      <div class="step reveal">
+        <span class="step-n">04</span>
+        <div class="step-content">
+          <h3>Review and improve</h3>
+          <p>A sixty-second daily review reveals your patterns and sharpens tomorrow's plan.</p>
+        </div>
+      </div>
+    </div>
+    <div class="how-visual reveal">
+      <div class="how-visual-bg"></div>
+      <span class="how-tag tl">Focus App</span>
+      <div class="phone-mock">
+        <div class="phone-bar accent"></div>
+        <div class="phone-bar short"></div>
+        <div class="phone-block highlight"></div>
+        <div class="phone-block"></div>
+        <div class="phone-bar" style="margin-top:0.5rem"></div>
+        <div class="phone-bar xshort"></div>
+        <div class="phone-block"></div>
+        <div class="phone-bar" style="margin-top:auto; width:30%; background: rgba(200,169,110,0.4)"></div>
+      </div>
+      <span class="how-tag br">v1.0</span>
+    </div>
+  </div>
+</section>
+
+<!-- DOWNLOAD CTA -->
+<section class="cta-section" id="download">
+  <div class="cta-inner">
+    <p class="section-label">Available now</p>
+    <h2 class="cta-title">Your best work<br><em>starts here.</em></h2>
+    <p class="cta-sub">Free to download. No subscription. No nonsense.</p>
+    <div class="store-badges">
+      <a href="Foucs.apk" download="Focus.apk" class="badge">
+        <span class="badge-icon">⬛</span>
+        <div>
+          <span class="badge-sub">Download on</span>
+          Android · APK
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- BUY ME A COFFEE -->
+<!-- ⚠️ Replace YOUR-BMC-USERNAME below with your actual Buy Me a Coffee username -->
+<section class="support" id="support">
+  <div class="support-inner">
+    <span class="support-icon">☕</span>
+    <p class="section-label reveal">Support the project</p>
+    <h2 class="support-title reveal">Built with care,<br><em>kept alive by you.</em></h2>
+    <p class="support-desc reveal">
+      Focus is free and always will be. If it's helped you do better work,<br>
+      a coffee goes a long way toward keeping it alive and improving.
+    </p>
+    <a href="https://www.buymeacoffee.com/YOUR-BMC-USERNAME" target="_blank" rel="noopener" class="bmc-btn reveal">
+      <span class="bmc-btn-icon">☕</span>
+      Buy me a coffee
+    </a>
+    <p class="support-note reveal">
+      Or visit <a href="https://www.buymeacoffee.com/YOUR-BMC-USERNAME" target="_blank" rel="noopener">buymeacoffee.com/YOUR-BMC-USERNAME</a>
+    </p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p class="footer-copy">© 2026 Focus App. All rights reserved.</p>
+  <ul class="footer-links">
+    <li><a href="#">Privacy</a></li>
+    <li><a href="#">Terms</a></li>
+    <li><a href="#support">Support</a></li>
+  </ul>
+</footer>
+
+<script>
+  // Cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+  (function animate() {
+    cursor.style.left = mx + 'px'; cursor.style.top = my + 'px';
+    rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
+    ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+    requestAnimationFrame(animate);
+  })();
+  document.querySelectorAll('a, button, .feature-card, .step, .badge, .bmc-btn').forEach(el => {
+    el.addEventListener('mouseenter', () => { ring.style.width = '50px'; ring.style.height = '50px'; ring.style.borderColor = 'rgba(200,169,110,0.8)'; });
+    el.addEventListener('mouseleave', () => { ring.style.width = '32px'; ring.style.height = '32px'; ring.style.borderColor = 'rgba(200,169,110,0.4)'; });
+  });
+
+  // Nav scroll
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => { nav.classList.toggle('scrolled', window.scrollY > 60); });
+
+  // Reveal on scroll
+  const reveals = document.querySelectorAll('.reveal');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 80);
+        obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(r => obs.observe(r));
+</script>
+</body>
+</html>
