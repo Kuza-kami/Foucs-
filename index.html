@@ -17,28 +17,35 @@
 <meta property="og:url" content="https://Kuza-kami.github.io/Foucs-" />
 <meta name="twitter:card" content="summary_large_image" />
 <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=DM+Mono:wght@300;400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
 <style>
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
   :root {
-    --bg: #0a0a0a;
-    --surface: #111111;
-    --border: #1e1e1e;
-    --text: #e8e4dc;
-    --muted: #5a5650;
-    --accent: #c8a96e;
-    --accent-dim: rgba(200,169,110,0.12);
+    --bg: #080a14;
+    --surface: #0f1220;
+    --surface-2: #151a2d;
+    --border: rgba(255, 255, 255, 0.1);
+    --text: #eff1ff;
+    --muted: #9ba3c7;
+    --accent: #7c8cff;
+    --accent-2: #4fe1c5;
+    --accent-dim: rgba(124, 140, 255, 0.15);
     --bmc: #FFDD00;
+    --shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
   }
 
   html { scroll-behavior: smooth; }
 
   body {
-    background: var(--bg);
+    background:
+      radial-gradient(circle at 10% 10%, rgba(124, 140, 255, 0.18), transparent 35%),
+      radial-gradient(circle at 90% 20%, rgba(79, 225, 197, 0.14), transparent 32%),
+      radial-gradient(circle at 80% 90%, rgba(124, 140, 255, 0.1), transparent 35%),
+      var(--bg);
     color: var(--text);
-    font-family: 'DM Mono', monospace;
-    font-weight: 300;
+    font-family: 'Inter', 'DM Mono', sans-serif;
+    font-weight: 400;
     min-height: 100vh;
     overflow-x: hidden;
     cursor: none;
@@ -69,16 +76,18 @@
 
   /* NAV */
   nav {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+    position: fixed; top: 1rem; left: 1.5rem; right: 1.5rem; z-index: 50;
     display: flex; align-items: center; justify-content: space-between;
-    padding: 2rem 3rem;
-    border-bottom: 1px solid transparent;
-    transition: border-color 0.4s, background 0.4s;
+    padding: 1rem 1.4rem;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    transition: border-color 0.4s, background 0.4s, box-shadow 0.4s;
   }
   nav.scrolled {
     border-color: var(--border);
-    background: rgba(10,10,10,0.92);
-    backdrop-filter: blur(12px);
+    background: rgba(10,12,22,0.78);
+    backdrop-filter: blur(18px);
+    box-shadow: var(--shadow);
   }
   .nav-logo {
     font-family: 'Cormorant Garamond', serif;
@@ -92,13 +101,16 @@
     color: var(--muted); text-decoration: none; transition: color 0.2s;
   }
   .nav-links a:hover { color: var(--text); }
+  .nav-links a { font-family: 'DM Mono', monospace; }
   .nav-cta {
     font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase;
-    color: var(--accent); border: 1px solid rgba(200,169,110,0.35);
-    padding: 0.55rem 1.2rem; text-decoration: none;
-    transition: background 0.2s, color 0.2s;
+    color: #fff; border: 1px solid rgba(124,140,255,0.5);
+    padding: 0.6rem 1.2rem; text-decoration: none;
+    border-radius: 999px;
+    background: linear-gradient(120deg, rgba(124,140,255,0.9), rgba(79,225,197,0.75));
+    transition: filter 0.2s, transform 0.2s;
   }
-  .nav-cta:hover { background: var(--accent); color: var(--bg); }
+  .nav-cta:hover { filter: brightness(1.08); transform: translateY(-1px); }
 
   /* HERO */
   .hero {
@@ -138,18 +150,26 @@
     color: var(--muted); max-width: 340px; line-height: 2;
     opacity: 0; animation: fadeUp 0.9s 0.5s forwards;
   }
+  .hero-chips { margin-top: 1.4rem; display: flex; gap: 0.7rem; flex-wrap: wrap; opacity: 0; animation: fadeUp 0.9s 0.58s forwards; }
+  .hero-chips span {
+    font-size: 0.58rem; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--text); padding: 0.45rem 0.8rem; border-radius: 999px;
+    border: 1px solid var(--border); background: rgba(255,255,255,0.02);
+  }
   .hero-actions {
     margin-top: 3.5rem; display: flex; align-items: center; gap: 2.5rem;
     opacity: 0; animation: fadeUp 0.9s 0.65s forwards;
   }
   .btn-primary {
-    background: var(--accent); color: var(--bg);
+    background: linear-gradient(120deg, var(--accent), var(--accent-2)); color: #fff;
     font-family: 'DM Mono', monospace; font-size: 0.65rem;
     letter-spacing: 0.2em; text-transform: uppercase;
     padding: 1rem 2.2rem; text-decoration: none; border: none; cursor: none;
-    transition: opacity 0.2s, transform 0.2s; display: inline-block;
+    border-radius: 999px;
+    box-shadow: 0 10px 35px rgba(124,140,255,0.35);
+    transition: filter 0.2s, transform 0.2s; display: inline-block;
   }
-  .btn-primary:hover { opacity: 0.85; transform: translateY(-1px); }
+  .btn-primary:hover { filter: brightness(1.08); transform: translateY(-2px); }
   .btn-ghost {
     font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase;
     color: var(--muted); text-decoration: none;
@@ -185,11 +205,14 @@
   .section-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.5rem, 5vw, 4.5rem); font-weight: 300; line-height: 1.1; max-width: 600px; margin-bottom: 6rem; }
   .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); }
   .feature-card {
-    background: var(--bg); padding: 3rem 2.5rem;
-    transition: background 0.3s; position: relative; overflow: hidden;
+    background: linear-gradient(170deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)); padding: 3rem 2.5rem;
+    transition: transform 0.3s, border-color 0.3s; position: relative; overflow: hidden;
+    border: 1px solid var(--border);
+    backdrop-filter: blur(8px);
   }
   .feature-card::before { content: ''; position: absolute; inset: 0; background: var(--accent-dim); opacity: 0; transition: opacity 0.3s; }
   .feature-card:hover::before { opacity: 1; }
+  .feature-card:hover { transform: translateY(-6px); border-color: rgba(124,140,255,0.45); }
   .feature-num { font-size: 0.55rem; letter-spacing: 0.25em; color: var(--accent); margin-bottom: 2rem; display: block; }
   .feature-icon { font-size: 1.6rem; margin-bottom: 1.5rem; display: block; filter: grayscale(0.3); }
   .feature-name { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 300; margin-bottom: 1rem; line-height: 1.2; }
@@ -201,7 +224,7 @@
     padding: 5rem 3rem; display: grid; grid-template-columns: repeat(3, 1fr);
     gap: 1px; background: var(--border);
   }
-  .stat-block { background: var(--bg); padding: 3rem; text-align: center; }
+  .stat-block { background: linear-gradient(170deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)); padding: 3rem; text-align: center; border: 1px solid var(--border); }
   .stat-num { font-family: 'Cormorant Garamond', serif; font-size: clamp(3rem, 6vw, 5rem); font-weight: 300; color: var(--accent); line-height: 1; margin-bottom: 0.8rem; }
   .stat-label { font-size: 0.6rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--muted); }
 
@@ -261,6 +284,7 @@
   .store-badges { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
   .badge {
     border: 1px solid var(--border); padding: 0.9rem 2rem;
+    border-radius: 14px;
     display: flex; align-items: center; gap: 0.8rem;
     text-decoration: none; color: var(--text); font-size: 0.65rem;
     letter-spacing: 0.1em; transition: border-color 0.2s, background 0.2s; cursor: none;
@@ -370,6 +394,17 @@
     footer { flex-direction: column; gap: 1.5rem; text-align: center; }
     .bmc-float { bottom: 1rem; right: 1rem; }
   }
+
+  @media (hover: none), (pointer: coarse) {
+    body, .btn-primary, .step, .badge, .bmc-btn, .bmc-float { cursor: auto; }
+    .cursor, .cursor-ring { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    html { scroll-behavior: auto; }
+  }
+
 </style>
 </head>
 <body>
@@ -403,6 +438,9 @@
   <p class="hero-label">Productivity · Clarity · Intention</p>
   <h1 class="hero-title">Do what<br><em>matters.</em></h1>
   <p class="hero-sub">A minimal task manager built for deep work. No clutter. No noise. Just focus.</p>
+  <div class="hero-chips">
+    <span>Beautifully minimal</span><span>Offline-first</span><span>Zero distractions</span>
+  </div>
   <div class="hero-actions">
     <a href="#download" class="btn-primary">Download Free</a>
     <a href="#features" class="btn-ghost">See Features</a>
